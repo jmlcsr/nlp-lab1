@@ -1,0 +1,60 @@
+# ============================================================
+# 作业一 .gitignore
+# 原则：只提交「源代码 + 原始数据 + 报告」，
+#       体积大 / 可由代码重新生成的东西一律不提交。
+# ============================================================
+
+# ---- 预训练词向量（体积巨大，务必排除）----
+# glove.6B.zip 约 822 MB，解压后的 glove.6B.100d.txt 约 347 MB
+embeddings/
+glove.6B.*
+*.zip
+
+# ---- HuggingFace 模型权重与缓存（约 440 MB）----
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+hf_cache/
+.cache/
+
+# ---- 数据划分结果（由 code/step0_split.py --stratify 生成）----
+# 若希望仓库自带划分结果以便他人完全复现，把下面两行注释掉即可
+data/
+
+# ---- 实验产生的中间文件（results/results.json 要提交，见下方反选）----
+results/*.csv
+results/*.tmp
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+
+# ---- 编辑器 / 操作系统 ----
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store
+._*
+__MACOSX/
+
+# ---- 日志与临时文件 ----
+*.log
+~$*
+
+# ---- 作业过程中的临时草稿（非交付物）----
+输出.md
+输出*.md
