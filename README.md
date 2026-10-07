@@ -63,9 +63,20 @@ python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
 
 **下载 GloVe 预训练词向量（Task 2.1 必需）：**
 
-- 下载地址：<http://nlp.stanford.edu/data/glove.6B.zip>（约 822 MB）
+- 官方地址：<http://nlp.stanford.edu/data/glove.6B.zip>（约 822 MB）
 - 解压后**只需要** `glove.6B.100d.txt`（约 347 MB），放到 `embeddings/` 目录
 - 由于体积原因该文件不随仓库提供，请自行下载
+
+**推荐用仓库内的脚本完成**（自动只解压 100d、按 5% 显示速度与 ETA、下载完删除 zip）：
+
+```bash
+python code/download_glove.py
+# 官方地址不可达时可换源：
+python code/download_glove.py --url <镜像地址>
+```
+
+> 说明：Windows 自带的 `curl.exe` **不读取系统代理**，直连境外站点容易被限速到
+> ~12 KB/s；而 Python 的 `urllib` **会**读取系统代理。这是该脚本用 Python 实现的原因。
 
 ---
 

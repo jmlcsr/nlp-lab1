@@ -38,7 +38,17 @@ def run(mode, train_df, val_df, test_df, min_df=2, C=1.0, class_weight=None):
     clf = LogisticRegression(max_iter=1000, C=C, class_weight=class_weight, n_jobs=-1)
     clf.fit(X_tr, train_df["label"])
 
+    # 类别不均衡的参照系：全部预测训练集里最多的类别
+    # NYT 中 sports 约占 75%，所以"多数类基线"的 Accuracy 约 0.75 而 Macro-F1 仅约 0.29
+    top_label = train_df["label"].value_counts().idxmax()
+    baseline_pred = [top_label] * len(test_df)
+    evaluate(
+        test_df["label"], baseline_pred, name=f"多数类基线(全预测 {top_label})", verbose=False
+    )
+
     model_name = "Binary-BoW + LR" if binary else "WordFrequency + LR"
+    if class_weight:
+        model_name += f" [class_weight={class_weight}]"
     evaluate(val_df["label"], clf.predict(X_va), name=f"{model_name} (val)")
     record = evaluate(test_df["label"], clf.predict(X_te), name=model_name)
     record["vocab_size"] = int(vocab_size)
