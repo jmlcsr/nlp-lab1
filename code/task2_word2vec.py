@@ -109,7 +109,7 @@ def main():
     X_va = build_doc_vectors(val_df, emb, tag=f"{args.source}:val")
     X_te = build_doc_vectors(test_df, emb, tag=f"{args.source}:test")
 
-    clf = LogisticRegression(max_iter=2000, C=args.C, n_jobs=-1)
+    clf = LogisticRegression(max_iter=2000, C=args.C)
     clf.fit(X_tr, train_df["label"])
 
     evaluate(val_df["label"], clf.predict(X_va), name=f"{name} (val)")

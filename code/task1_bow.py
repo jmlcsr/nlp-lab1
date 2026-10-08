@@ -35,7 +35,8 @@ def run(mode, train_df, val_df, test_df, min_df=2, C=1.0, class_weight=None):
     print(f"[{mode}] 稀疏矩阵非零元素占比 = {X_tr.nnz / (X_tr.shape[0] * X_tr.shape[1]):.6f}")
 
     # max_iter 要放大：高维稀疏 + 多分类时默认 100 次往往不收敛
-    clf = LogisticRegression(max_iter=1000, C=C, class_weight=class_weight, n_jobs=-1)
+    # 注：sklearn >= 1.8 已忽略 n_jobs（多分类 LR 本身不用它），故不再传
+    clf = LogisticRegression(max_iter=1000, C=C, class_weight=class_weight)
     clf.fit(X_tr, train_df["label"])
 
     # 类别不均衡的参照系：全部预测训练集里最多的类别

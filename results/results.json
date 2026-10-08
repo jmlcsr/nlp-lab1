@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Binary-BoW + LR",
+    "accuracy": 0.9790393013100437,
+    "macro_f1": 0.9468405836859741,
+    "vocab_size": 53146
+  },
+  {
+    "name": "Binary-BoW + LR [class_weight=balanced]",
+    "accuracy": 0.9790393013100437,
+    "macro_f1": 0.9479418524820155,
+    "vocab_size": 53146
+  },
+  {
+    "name": "WordFrequency + LR",
+    "accuracy": 0.982532751091703,
+    "macro_f1": 0.9542325329284903,
+    "vocab_size": 53146
+  },
+  {
+    "name": "WordFrequency + LR [class_weight=balanced]",
+    "accuracy": 0.9807860262008734,
+    "macro_f1": 0.9506459370356941,
+    "vocab_size": 53146
+  }
+]
