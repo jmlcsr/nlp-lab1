@@ -12,6 +12,27 @@
     "vocab_size": 53146
   },
   {
+    "name": "GloVe-100 mean + LR",
+    "accuracy": 0.9781659388646288,
+    "macro_f1": 0.9471312588889335,
+    "source": "glove",
+    "vec_dim": 100
+  },
+  {
+    "name": "W2V(AGNews)-100 mean + LR",
+    "accuracy": 0.9685589519650655,
+    "macro_f1": 0.9226502512052089,
+    "source": "ag",
+    "vec_dim": 100
+  },
+  {
+    "name": "W2V(NYT)-100 mean + LR",
+    "accuracy": 0.97117903930131,
+    "macro_f1": 0.9308366841487073,
+    "source": "nyt",
+    "vec_dim": 100
+  },
+  {
     "name": "WordFrequency + LR",
     "accuracy": 0.982532751091703,
     "macro_f1": 0.9542325329284903,
