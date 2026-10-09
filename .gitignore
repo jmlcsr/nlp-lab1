@@ -55,6 +55,14 @@ __MACOSX/
 *.log
 ~$*
 
+# ---- LaTeX 编译中间产物（report/report.tex → report/report.pdf）----
+*.aux
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
 # ---- 作业过程中的临时草稿（非交付物）----
 输出.md
 输出*.md

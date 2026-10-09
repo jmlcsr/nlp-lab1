@@ -58,6 +58,11 @@ lab1/
 │   ├── truncation_stats.json   # BERT 截断统计（analyze.py 产出）
 │   ├── error_analysis.md       # 混淆矩阵与典型错例（analyze.py 产出）
 │   └── bert_test_predictions.csv  # BERT 测试集预测（供错误分析）
+├── report/
+│   ├── report.tex              # 实验报告源文件（XeLaTeX + ctexart）
+│   ├── report.pdf              # 实验报告成品（24 页）
+│   └── figs/                   # 报告配图（12 张终端截图，ASCII 文件名）
+├── report.pdf                  # 报告 PDF 副本（放根目录，便于直接打开）
 ├── 作业一要求.md
 ├── 作业总览与详细步骤.md          # 实验步骤与踩坑记录
 └── README.md
@@ -138,6 +143,10 @@ python code/task3_bert.py --no_save --epochs 3              # 正式实验（约
 python code/analyze.py
 ```
 
+> ⚠️ **命令中的 `python` 必须指向已装好依赖的 lab1 环境**（如
+> `D:\Miniconda\envs\lab1\python.exe`）。若用系统 Python，会因缺少 nltk 而退化为
+> 正则分词，`|V|` 与全部指标都会变化（详见第 6 节最后一行）。
+
 > **关于 `--no_save`**：不保存 checkpoint，训练结束后也不回载"最佳模型"。这样做
 > (1) 最终评测严格对应**第 3 轮结束时的模型**，与作业"训练 3 epochs"的要求严格对应；
 > (2) 规避 `transformers 5.19` 在 `save_pretrained → load_state_dict` 往返中
@@ -187,6 +196,13 @@ python code/analyze.py
 - `results/truncation_stats.json`：截断统计（平均 **834.2** token、**99.96%** 文档超 64、平均保留 **7.67%**）
 - `results/error_analysis.md`：混淆矩阵与典型错例（错误 **20 / 1145**，其中 **75%** 集中在 business ↔ politics）
 - 每个脚本运行时会同时打印 **词表大小 / 词覆盖率 / 无有效词文档数** 等诊断信息，便于在报告中分析
+- `report/report.pdf`：**实验报告成品（24 页）**；源文件 `report/report.tex`，配图在 `report/figs/`。
+  编译方式（XeLaTeX，中文需此编译器）：
+
+  ```bash
+  cd report
+  xelatex report.tex   # 连续执行两遍，以生成目录与交叉引用
+  ```
 
 ---
 
@@ -194,7 +210,7 @@ python code/analyze.py
 
 | 现象 | 原因与解决 |
 | --- | --- |
-| `LookupError: Resource punkt not found` | 未下载 nltk 数据，见第 2 节；脚本会自动退化为正则分词并打印警告 |
+| `LookupError: Resource punkt not found` 或 `nltk 分词数据不可用` | 未下载 nltk 数据，或**用错了 Python 解释器**。脚本会退化为正则分词并打印警告，但结果会变：实测退化为正则后 `|V|` = 43248、Binary BoW Test 0.9808/0.9515，与正式结果（`|V|` = 53146、0.9790/0.9468）不同。请按第 2 节安装 nltk 数据，并确认使用的是 lab1 环境的解释器 |
 | pip 报 `WinError 10061 由于目标计算机积极拒绝` | 系统配置了本地代理（如 `127.0.0.1:7897`）但代理未启动；启动代理或改用国内镜像 |
 | 走清华源报 `SSLEOFError` | 代理与镜像的 TLS 冲突；改用官方 PyPI，或设置 `NO_PROXY` 后重试 |
 | `torch.cuda.is_available()` 为 False | 装成了 CPU 版；必须用 `--index-url https://download.pytorch.org/whl/cu124` 重装 |
