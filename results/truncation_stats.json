@@ -1,0 +1,10 @@
+{
+  "n_docs": 11447,
+  "max_length": 64,
+  "token_len_mean": 834.208613610553,
+  "token_len_median": 872.0,
+  "token_len_p90": 1239.0,
+  "token_len_max": 6775,
+  "frac_exceeding_max_len": 0.999563204333013,
+  "mean_kept_ratio": 0.07671177417635389
+}

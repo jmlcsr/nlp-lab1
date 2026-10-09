@@ -57,8 +57,28 @@ def compute_metrics(pred):
     }
 
 
-def build_training_args(out_dir, epochs, batch_size, lr):
-    """按当前 transformers 版本过滤参数名，避免版本改名导致崩溃。"""
+def collate_batch(features):
+    """把 list[dict[str, Tensor]] 堆叠成一个 batch 字典。
+
+    DataLoader 的 collate_fn：本 Dataset 每条返回
+    {input_ids, token_type_ids, attention_mask, labels}，
+    这里按 key 逐列 stack 成一个 batch。显式传入也可省掉 Trainer
+    额外的列过滤包装（我们的 Dataset 本就只返回模型需要的列）。
+    """
+    keys = list(features[0].keys())
+    return {k: torch.stack([f[k] for f in features]) for k in keys}
+
+
+def build_training_args(out_dir, epochs, batch_size, lr, no_save=False):
+    """按当前 transformers 版本过滤参数名，避免版本改名导致崩溃。
+
+    no_save=True 时不保存 checkpoint、也不在训练结束后回载"最佳模型"。
+    原因：本机 transformers 5.19 在 save_pretrained -> load_state_dict 往返中
+    存在 LayerNorm 参数命名不匹配（保存为 gamma/beta，加载时期望 weight/bias），
+    会打印大量 missing / unexpected keys 警告，并使最终评测用的不是末轮模型。
+    禁用往返可彻底规避该问题，也更贴合作业要求（"训练 3 epochs"
+    即以第 3 轮结束时的模型为准）。
+    """
     use_cuda = torch.cuda.is_available()
     bf16_ok = use_cuda and hasattr(torch.cuda, "is_bf16_supported") and torch.cuda.is_bf16_supported()
 
@@ -71,9 +91,9 @@ def build_training_args(out_dir, epochs, batch_size, lr):
         weight_decay=0.01,
         warmup_ratio=0.1,
         logging_steps=50,
-        save_strategy="epoch",
+        save_strategy="no" if no_save else "epoch",
         save_total_limit=1,
-        load_best_model_at_end=True,
+        load_best_model_at_end=not no_save,
         metric_for_best_model="macro_f1",
         greater_is_better=True,
         bf16=bf16_ok,                 # 40 系显卡支持 bf16，数值更稳
@@ -81,6 +101,9 @@ def build_training_args(out_dir, epochs, batch_size, lr):
         seed=42,
         report_to="none",
         dataloader_num_workers=0,
+        # 我们的 Dataset 已只返回模型需要的列；关掉列过滤可避免
+        # Trainer 用 RemoveColumnsCollator 包装 collator（见 collate_batch 注释）
+        remove_unused_columns=False,
     )
 
     params = inspect.signature(TrainingArguments.__init__).parameters
@@ -103,6 +126,12 @@ def main():
     ap.add_argument("--batch_size", type=int, default=16)
     ap.add_argument("--lr", type=float, default=2e-5)
     ap.add_argument("--limit", type=int, default=0, help=">0 时只用前 N 条做冒烟测试")
+    ap.add_argument(
+        "--no_save",
+        action="store_true",
+        help="不保存 checkpoint、不回载最佳模型（规避 transformers 5.19 的 LayerNorm 往返问题，"
+        "并使最终评测对应末轮模型）",
+    )
     args = ap.parse_args()
 
     print(f"CUDA 可用: {torch.cuda.is_available()}")
@@ -136,9 +165,12 @@ def main():
 
     trainer = Trainer(
         model=model,
-        args=build_training_args(args.out, args.epochs, args.batch_size, args.lr),
+        args=build_training_args(
+            args.out, args.epochs, args.batch_size, args.lr, args.no_save
+        ),
         train_dataset=ds_train,
         eval_dataset=ds_val,
+        data_collator=collate_batch,
         compute_metrics=compute_metrics,
     )
 
@@ -148,6 +180,7 @@ def main():
     print(trainer.evaluate(ds_val))
     print("=== test ===")
     test_metrics = trainer.evaluate(ds_test)
+    print(test_metrics)
 
     record = {
         "name": f"BERT-base-uncased (max_len={MAX_LEN}, epochs={args.epochs})",
